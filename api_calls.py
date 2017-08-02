@@ -23,6 +23,7 @@ class SurveyResults(ApiGetCall):
         super().__init__(access_token)
 
     def get_survey_details(self, survey_id):
+        """ Make a call to get survey details """
         url = self.host + "surveys/%s/details" % (survey_id)
         response = self.client.get(url).json()
 
@@ -45,11 +46,12 @@ class SurveyResults(ApiGetCall):
 
         for col in output.columns:
             if "_id" in col:
-                output[col] = output[col].astype(string))
+                output[col] = output[col].astype(str)
 
         return output
 
     def _parse_survey_details(self, survey_detail_page):
+        """ Helper function to get questions from page object """
 
         # Set up question collector
         compiled_questions = []
@@ -92,6 +94,7 @@ class SurveyResults(ApiGetCall):
         return results
 
     def get_survey_responses(self, survey_id):
+        """ Make calls to loop through all survey responses """
 
         url = self.host + 'surveys/%s/responses/bulk/?per_page=100' % (survey_id)
         response = self.client.get(url).json()
@@ -103,14 +106,16 @@ class SurveyResults(ApiGetCall):
 
         results = pd.concat(results)
         results = results.rename(columns={'id': 'respondent_id'})
+        results = results.drop(labels='page_path', axis=1)
 
         for col in results.columns:
             if "_id" in col:
-                results[col] = results[col].astype(string))
+                results[col] = results[col].astype(str)
 
         return results
 
     def _parse_bulk_responses(self, response):
+        """ Helper function to get responses from response object """
         compiled_responses = []
 
         for respondent in response['data']:
